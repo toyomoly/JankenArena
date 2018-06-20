@@ -1,0 +1,12 @@
+#Java
+*.class
+work
+
+#Eclipse
+.project
+.classpath
+.settings
+
+#Windows
+Thumbs.db
+/bin/
