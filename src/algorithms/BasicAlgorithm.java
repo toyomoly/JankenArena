@@ -7,6 +7,7 @@ public abstract class BasicAlgorithm implements JankenAlgorithm {
 
 	protected int winCount;
 	protected int loseCount;
+	protected int drawCount;
 	protected List<Integer> myHands;
 	protected List<Integer> hisHands;
 
@@ -14,6 +15,7 @@ public abstract class BasicAlgorithm implements JankenAlgorithm {
 	public BasicAlgorithm() {
 		this.winCount = 0;
 		this.loseCount = 0;
+		this.drawCount = 0;
 		this.myHands = new ArrayList<Integer>();
 		this.hisHands = new ArrayList<Integer>();
 	}
@@ -30,6 +32,9 @@ public abstract class BasicAlgorithm implements JankenAlgorithm {
 			}
 			if (last.isLose()) {
 				this.loseCount++;
+			}
+			if (last.isDraw()) {
+				this.drawCount++;
 			}
 		}
 		return algorithm(round, last);
