@@ -113,27 +113,38 @@ public class Main {
 		LastStatus lastP1 = new LastStatus(0, 0, false, false, false);
 		LastStatus lastP2 = new LastStatus(0, 0, false, false, false);
 
-		int countP1 = 0;
-		int countP2 = 0;
+		int countP1Win = 0;
+		int countP1Lose = 0;
+		int countP2Win = 0;
+		int countP2Lose = 0;
 		int countDraw = 0;
 
 		for (int round = 1; round <= roundMax; round++) {
 			int hand1 = p1.janken(round, lastP1);
 			int hand2 = p2.janken(round, lastP2);
 
+			// System.out.println(hand1 + " - " + hand2);
+
 			lastP1 = getStatus(hand1, hand2);
 			lastP2 = getStatus(hand2, hand1);
 
 			if (lastP1.isDraw()) {
 				countDraw++;
-			} else if (lastP1.isWin()) {
-				countP1++;
-			} else if (lastP2.isWin()) {
-				countP2++;
+			}
+			if (lastP1.isWin()) {
+				countP1Win++;
+			} else if (lastP1.isLose()) {
+				countP1Lose++;
+			}
+			if (lastP2.isWin()) {
+				countP2Win++;
+			} else if (lastP2.isLose()) {
+				countP2Lose++;
 			}
 		}
 
-		return new Score(p1.getClass().getSimpleName(), p2.getClass().getSimpleName(), countP1, countP2, countDraw);
+		return new Score(p1.getClass().getSimpleName(), p2.getClass().getSimpleName(), countP1Win, countP2Win,
+				countP1Lose, countP2Lose, countDraw);
 	}
 
 	// 0:あいこ, 1:hand1の勝ち, 2:hand1の負け, 3:両方負け
@@ -167,37 +178,48 @@ public class Main {
 		boolean win = (result == 1);
 		boolean lose = (result > 1);
 		boolean draw = (result == 0);
+		// 不正な手は0にする
+		if (!check(myHand)) {
+			myHand = 0;
+		}
+		if (!check(hisHand)) {
+			hisHand = 0;
+		}
 		return new LastStatus(myHand, hisHand, win, lose, draw);
 	}
 
 	private static class Score {
 		private String className1;
 		private String className2;
-		private int win;
-		private int lose;
+		private int win1;
+		private int win2;
+		private int lose1;
+		private int lose2;
 		private int draw;
 
-		Score(String className1, String className2, int win, int lose, int draw) {
+		Score(String className1, String className2, int win1, int win2, int lose1, int lose2, int draw) {
 			this.className1 = className1;
 			this.className2 = className2;
-			this.win = win;
-			this.lose = lose;
+			this.win1 = win1;
+			this.win2 = win2;
+			this.lose1 = lose1;
+			this.lose2 = lose2;
 			this.draw = draw;
 		}
 
 		public int getWin(String className) {
 			if (className.equals(this.className2)) {
-				return lose;
+				return win2;
 			} else {
-				return win;
+				return win1;
 			}
 		}
 
 		public int getLose(String className) {
 			if (className.equals(this.className2)) {
-				return win;
+				return lose2;
 			} else {
-				return lose;
+				return lose1;
 			}
 		}
 
