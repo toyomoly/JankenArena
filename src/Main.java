@@ -1,9 +1,13 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import algorithms.Algorithm00Pa;
 import algorithms.Algorithm00Sample;
+import algorithms.Algorithm51Hanako;
+import algorithms.Algorithm52Paman;
 import algorithms.JankenAlgorithm;
+import algorithms.JankenAlgorithm.LastStatus;
 
 public class Main {
 
@@ -13,8 +17,9 @@ public class Main {
 
 		try {
 			// アルゴリズムのリストにエントリー
-			algorithms.add(Algorithm00Pa.class);
 			algorithms.add(Algorithm00Sample.class);
+			algorithms.add(Algorithm51Hanako.class);
+			algorithms.add(Algorithm52Paman.class);
 
 			start(algorithms);
 
@@ -28,67 +33,107 @@ public class Main {
 	private static void start(List<Class<?>> algorithms) throws Exception {
 
 		int roundMax = 1000;
-		String formatParam = "%-16s";
+		String formatParam = "%-14s";
+
+		Map<String, Score> scores = new HashMap<>();
+		// 総当り実施
+		for (Class<?> c1 : algorithms) {
+			for (Class<?> c2 : algorithms) {
+				if (c1 != c2) {
+					String key = getScoreKey(c1, c2);
+
+					if (scores.get(key) == null) {
+						JankenAlgorithm p1 = (JankenAlgorithm) c1.newInstance();
+						JankenAlgorithm p2 = (JankenAlgorithm) c2.newInstance();
+						scores.put(key, match(p1, p2, roundMax));
+					}
+				}
+			}
+		}
 
 		// ヘッダー部
-		System.out.print(String.format(formatParam, "-"));
+		System.out.print(String.format(formatParam, ""));
 		for (Class<?> c1 : algorithms) {
-			System.out.print(String.format(formatParam, c1.getName().substring(20)));
+			System.out.print(String.format(formatParam, c1.getSimpleName().substring(9)));
 		}
+		System.out.print(String.format(formatParam, "Total"));
 		System.out.println();
 
 		// ボディ部
 		for (Class<?> c1 : algorithms) {
-			System.out.print(String.format(formatParam, c1.getName().substring(20)));
+			StringBuilder row1 = new StringBuilder();
+			StringBuilder row2 = new StringBuilder();
+			row1.append(String.format(formatParam, c1.getSimpleName().substring(9)));
+			row2.append(String.format(formatParam, ""));
+
+			int totalWin = 0;
+			int totalLose = 0;
+			int totalDraw = 0;
+
 			for (Class<?> c2 : algorithms) {
 				if (c1 == c2) {
-					System.out.print(String.format(formatParam, "-"));
+					row1.append(String.format(formatParam, ""));
+					row2.append(String.format(formatParam, ""));
 				} else {
-					JankenAlgorithm p1 = (JankenAlgorithm) c1.newInstance();
-					JankenAlgorithm p2 = (JankenAlgorithm) c2.newInstance();
-					System.out.print(String.format(formatParam, match(p1, p2, roundMax)));
+					String key = getScoreKey(c1, c2);
+					Score score = scores.get(key);
+					String w = String.format("%4s", score.getWin(c1.getSimpleName()));
+					String l = String.format("%4s", score.getLose(c1.getSimpleName()));
+					String d = String.format("%4s", score.getDraw());
+
+					row1.append(String.format(formatParam, w + " -" + l));
+					row2.append(String.format(formatParam, "  (" + d + " )"));
+
+					totalWin += score.getWin(c1.getSimpleName());
+					totalLose += score.getLose(c1.getSimpleName());
+					totalDraw += score.getDraw();
 				}
 			}
-			System.out.println();
+
+			row1.append(String.format("%5s", totalWin) + " - " + String.format("%5s", totalLose));
+			row2.append("   (" + String.format("%5s", totalDraw) + " )");
+
+			System.out.println(row1.toString());
+			System.out.println(row2.toString());
 		}
 	}
 
-	private static String match(JankenAlgorithm p1, JankenAlgorithm p2, int roundMax) {
+	private static String getScoreKey(Class c1, Class c2) {
+		String s1 = c1.getSimpleName();
+		String s2 = c2.getSimpleName();
+		if (s1.compareTo(s2) > 0) {
+			return s2 + s1;
+		} else {
+			return s1 + s2;
+		}
+	}
 
-		int lastP1Hand = 0;
-		int lastP2Hand = 0;
-		boolean lastP1Won = false;
-		boolean lastP2Won = false;
+	private static Score match(JankenAlgorithm p1, JankenAlgorithm p2, int roundMax) {
+
+		LastStatus lastP1 = new LastStatus(0, 0, false, false, false);
+		LastStatus lastP2 = new LastStatus(0, 0, false, false, false);
 
 		int countP1 = 0;
 		int countP2 = 0;
 		int countDraw = 0;
 
 		for (int round = 1; round <= roundMax; round++) {
-			int hand1 = p1.janken(round, lastP1Hand, lastP2Hand, lastP1Won);
-			int hand2 = p2.janken(round, lastP2Hand, lastP1Hand, lastP2Won);
+			int hand1 = p1.janken(round, lastP1);
+			int hand2 = p2.janken(round, lastP2);
 
-			int result = judge(hand1, hand2);
+			lastP1 = getStatus(hand1, hand2);
+			lastP2 = getStatus(hand2, hand1);
 
-			lastP1Hand = hand1;
-			lastP2Hand = hand2;
-			lastP1Won = false;
-			lastP2Won = false;
-
-			if (result == 0) {
+			if (lastP1.isDraw()) {
 				countDraw++;
-			} else if (result == 1) {
+			} else if (lastP1.isWin()) {
 				countP1++;
-				lastP1Won = true;
-			} else if (result == 2) {
+			} else if (lastP2.isWin()) {
 				countP2++;
-				lastP2Won = true;
-			} else if (result == 3) {
-				// nothing
 			}
 		}
 
-		return countP1 + "-" + countP2 + " (" + countDraw + ")";
+		return new Score(p1.getClass().getSimpleName(), p2.getClass().getSimpleName(), countP1, countP2, countDraw);
 	}
 
 	// 0:あいこ, 1:hand1の勝ち, 2:hand1の負け, 3:両方負け
@@ -115,6 +160,50 @@ public class Main {
 	// 入力値が正しいか？
 	private static boolean check(int hand) {
 		return (1 <= hand) && (hand <= 3);
+	}
+
+	private static LastStatus getStatus(int myHand, int hisHand) {
+		int result = judge(myHand, hisHand);
+		boolean win = (result == 1);
+		boolean lose = (result > 1);
+		boolean draw = (result == 0);
+		return new LastStatus(myHand, hisHand, win, lose, draw);
+	}
+
+	private static class Score {
+		private String className1;
+		private String className2;
+		private int win;
+		private int lose;
+		private int draw;
+
+		Score(String className1, String className2, int win, int lose, int draw) {
+			this.className1 = className1;
+			this.className2 = className2;
+			this.win = win;
+			this.lose = lose;
+			this.draw = draw;
+		}
+
+		public int getWin(String className) {
+			if (className.equals(this.className2)) {
+				return lose;
+			} else {
+				return win;
+			}
+		}
+
+		public int getLose(String className) {
+			if (className.equals(this.className2)) {
+				return win;
+			} else {
+				return lose;
+			}
+		}
+
+		public int getDraw() {
+			return draw;
+		}
 	}
 
 }

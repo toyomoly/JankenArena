@@ -5,36 +5,37 @@ import java.util.List;
 
 public abstract class BasicAlgorithm implements JankenAlgorithm {
 
-	private int wonCount;
-	private int loseCount;
-	private List<Integer> myHands;
-	private List<Integer> hisHands;
+	protected int winCount;
+	protected int loseCount;
+	protected List<Integer> myHands;
+	protected List<Integer> hisHands;
 
 	// コンストラクタ
 	public BasicAlgorithm() {
-		this.wonCount = 0;
+		this.winCount = 0;
 		this.loseCount = 0;
 		this.myHands = new ArrayList<Integer>();
 		this.hisHands = new ArrayList<Integer>();
 	}
 
 	// メンバ変数のセットなどを行うのみで、ロジックは algorithm にまかせる
-	public int janken(int round, int lastMyHand, int lastHisHand, boolean lastWon) {
+	public int janken(int round, LastStatus last) {
 
 		if (round > 1) {
-			this.myHands.add(lastMyHand);
-			this.hisHands.add(lastHisHand);
+			this.myHands.add(last.getMyHand());
+			this.hisHands.add(last.getHisHand());
 
-			if (lastWon) {
-				this.wonCount++;
-			} else {
+			if (last.isWin()) {
+				this.winCount++;
+			}
+			if (last.isLose()) {
 				this.loseCount++;
 			}
 		}
-		return algorithm(round, lastMyHand, lastHisHand, lastWon);
+		return algorithm(round, last);
 	};
 
 	// 継承先の子クラスでオーバーライドするメソッド
-	public abstract int algorithm(int round, int lastMyHand, int lastHisHand, boolean lastWon);
+	protected abstract int algorithm(int round, LastStatus last);
 
 }

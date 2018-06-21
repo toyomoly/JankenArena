@@ -1,9 +1,8 @@
 package algorithms;
 
-public class Algorithm00Sample 
-implements JankenAlgorithm {
+public class Algorithm00Sample implements JankenAlgorithm {
 
-	public int janken(int round, int lastMyHand, int lastHisHand, boolean lastWon) {
+	public int janken(int round, LastStatus last) {
 
 		int result = 0;
 
