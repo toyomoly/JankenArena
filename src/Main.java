@@ -6,6 +6,7 @@ import java.util.Map;
 import algorithms.Algorithm00Sample;
 import algorithms.Algorithm51Hanako;
 import algorithms.Algorithm52Paman;
+import algorithms.Algorithm92Balthasar;
 import algorithms.JankenAlgorithm;
 import algorithms.JankenAlgorithm.LastStatus;
 
@@ -20,6 +21,7 @@ public class Main {
 			algorithms.add(Algorithm00Sample.class);
 			algorithms.add(Algorithm51Hanako.class);
 			algorithms.add(Algorithm52Paman.class);
+			algorithms.add(Algorithm92Balthasar.class);
 
 			start(algorithms);
 
