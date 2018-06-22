@@ -120,8 +120,19 @@ public class Main {
 		int countDraw = 0;
 
 		for (int round = 1; round <= roundMax; round++) {
-			int hand1 = p1.janken(round, lastP1);
-			int hand2 = p2.janken(round, lastP2);
+			int hand1 = 0;
+			try {
+				hand1 = p1.janken(round, lastP1);
+			} catch (Exception e) {
+				hand1 = 0;
+			}
+
+			int hand2 = 0;
+			try {
+				hand2 = p2.janken(round, lastP2);
+			} catch (Exception e) {
+				hand2 = 0;
+			}
 
 			// System.out.println(hand1 + " - " + hand2);
 
