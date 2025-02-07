@@ -12,6 +12,7 @@ import algorithms.JankenAlgorithm.LastStatus;
 
 public class Main {
 
+	// The main method initializes a list of algorithms and starts the Janken (rock-paper-scissors) match.
 	public static void main(String[] args) {
 
 		List<Class<?>> algorithms = new ArrayList<>();
@@ -32,6 +33,7 @@ public class Main {
 
 	}
 
+	// The start method performs a round-robin tournament with the list of algorithms.
 	private static void start(List<Class<?>> algorithms) throws Exception {
 
 		int roundMax = 1000;
@@ -110,6 +112,7 @@ public class Main {
 		}
 	}
 
+	// The match method simulates the Janken matches between two algorithms for a specified number of rounds.
 	private static Score match(JankenAlgorithm p1, JankenAlgorithm p2, int roundMax) {
 
 		LastStatus lastP1 = new LastStatus(0, 0, false, false, false);
@@ -160,6 +163,7 @@ public class Main {
 				countP1Lose, countP2Lose, countDraw);
 	}
 
+	// The judge method determines the result of a Janken match between two hands.
 	// 0:あいこ, 1:hand1の勝ち, 2:hand1の負け, 3:両方負け
 	private static int judge(int hand1, int hand2) {
 		if (check(hand1)) {
@@ -186,6 +190,7 @@ public class Main {
 		return (1 <= hand) && (hand <= 3);
 	}
 
+	// The getStatus method returns the status of the last match between two hands.
 	private static LastStatus getStatus(int myHand, int hisHand) {
 		int result = judge(myHand, hisHand);
 		boolean win = (result == 1);
